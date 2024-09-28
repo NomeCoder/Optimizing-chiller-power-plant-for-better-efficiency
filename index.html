@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution to Power Plants</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-image: url('https://www.flucon.co/Admin_Site/Articles/Images/1005/0/24800287-5c82-44dc-9296-8e49cb63fec6123.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 1200px; /* Increased max width for wider appearance */
+            width: 100%; /* Make the container responsive */
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5em;
+            margin: 0;
+            color: #333;
+        }
+
+        .box-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .box {
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 250px; /* Slightly wider box */
+            height: 150px;
+            margin: 10px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .file-upload {
+            display: flex;
+            align-items: center; /* Align items vertically */
+            margin-top: 10px; /* Add some space above */
+        }
+
+        .file-upload input[type="file"] {
+            display: none; /* Hide the default file input */
+        }
+
+        .file-upload label {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px; /* Space between label and text */
+        }
+
+        .file-upload .file-name {
+            margin-left: 10px; /* Space between label and text */
+            font-size: 1em;
+            color: #333;
+        }
+
+        table {
+            width: 100%; /* Make the table full width */
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white; /* Solid white background */
+            border-radius: 8px;
+            overflow: hidden; /* Prevent borders from overflowing */
+            text-align: left; /* Align table content to the left */
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left; /* Ensure headers and cells are left-aligned */
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Solution to over-consumption of power in Chiller Plants</h1>
+        <div class="box-container">
+            <div class="box">
+                <h2>Upload Excel File</h2>
+                <div class="file-upload">
+                    <label for="excelFile">Choose File</label>
+                    <input type="file" id="excelFile" accept=".xls,.xlsx" />
+                    <span class="file-name">No file chosen</span>
+                </div>
+                <button id="uploadButton" disabled>Upload</button>
+                <div id="tableContainer"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let selectedFile = null;
+
+            document.getElementById('excelFile').addEventListener('change', function(event) {
+                selectedFile = event.target.files[0];
+                const fileNameElement = document.querySelector('.file-name');
+                if (selectedFile) {
+                    document.getElementById('uploadButton').disabled = false; // Enable the upload button once a file is selected
+                    fileNameElement.textContent = selectedFile.name; // Display the file name
+                } else {
+                    fileNameElement.textContent = 'No file chosen'; // Reset if no file
+                }
+            });
+
+            document.getElementById('uploadButton').addEventListener('click', function() {
+                if (selectedFile) {
+                    handleFileUpload(selectedFile);
+                }
+            });
+
+            function handleFileUpload(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    processExcelData(excelData);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            function processExcelData(excelData) {
+                const headers = excelData[0];
+                const rows = excelData.slice(1);
+
+                const WBT_C = [];
+                const Power = [];
+                const GPN = [];
+                const DeltaCDW = []; // Changed to DeltaCDW
+                const WBT_CIndex = headers.indexOf('WBT_C');
+                const PowerIndex = headers.indexOf('Power');
+                const GPNIndex = headers.indexOf('GPN Flow'); // Ensure this matches your column name in Excel
+                const DeltaCDWIndex = headers.indexOf('DeltaCDW'); // Ensure this matches your column name in Excel
+
+                // Extract WBT_C, Power, GPN, and DeltaCDW values
+                rows.forEach(row => {
+                    if (!isNaN(row[WBT_CIndex])) {
+                        WBT_C.push(parseFloat(row[WBT_CIndex]));
+                    }
+                });
+
+                // Calculate the average of WBT_C
+                const avgWBT_C = calculateAverage(WBT_C);
+
+                // Determine status based on average WBT_C and calculate desired power input
+                const updatedData = rows.map(row => {
+                    const rowWBT_C = parseFloat(row[WBT_CIndex]);
+                    const gpn = parseFloat(row[GPNIndex]);
+                    const deltaCDW = parseFloat(row[DeltaCDWIndex]); // Use DeltaCDW
+
+                    // Check if GPN Flow is 0
+                    let desiredPowerInput;
+                    if (gpn === 0) {
+                        desiredPowerInput = 'Not defined';
+                    } else if (gpn && deltaCDW) {
+                        desiredPowerInput = `${ (1000000*(3.5 / (gpn * 4186 * deltaCDW))).toString() }`; // No rounding
+                    } else {
+                        desiredPowerInput = ''; // Leave empty if no valid input
+                    }
+
+                    const status = rowWBT_C < avgWBT_C ? 'System optimized' : 'Needs optimization';
+                    return [...row, status, desiredPowerInput]; // Add status and desired power input columns
+                });
+
+                // Create the table with updated data
+                headers.push('Predictions', 'Desired Power Input (KWh)'); // Change to Desired Power Input (KWh)
+                createTable(headers, updatedData);
+            }
+
+            function calculateAverage(arr) {
+                const sum = arr.reduce((acc, val) => acc + val, 0);
+                return sum / arr.length;
+            }
+
+            function createTable(headers, data) {
+                const tableContainer = document.getElementById('tableContainer');
+                tableContainer.innerHTML = '';
+
+                const table = document.createElement('table');
+                const headerRow = document.createElement('tr');
+
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                table.appendChild(headerRow);
+
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach((cell, index) => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+
+                        // Add specific style to the Predictions cell
+                        if (index === row.length - 2) { // Predictions column
+                            if (cell === 'Needs optimization') {
+                                td.style.backgroundColor = '#ffcccc'; // Light red
+                            } else if (cell === 'System optimized') {
+                                td.style.backgroundColor = '#ccffcc'; // Light green
+                            }
+                        }
+                        tr.appendChild(td);
+                    });
+                    table.appendChild(tr);
+                });
+
+                tableContainer.appendChild(table);
+            }
+        });
+    </script>
+</body>
+</html>

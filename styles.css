@@ -1,0 +1,74 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-image: url('https://www.flucon.co/Admin_Site/Articles/Images/1005/0/24800287-5c82-44dc-9296-8e49cb63fec6123.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #333; /* Default text color */
+}
+
+.container {
+    text-align: center;
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Add shadow to the container */
+}
+
+h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5em; /* Larger size for the main heading */
+    margin-bottom: 20px;
+    color: #444; /* Darker color for better contrast */
+}
+
+h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5em; /* Size for subheadings */
+    margin: 0;
+    color: #333;
+}
+
+.box-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.box {
+    background-color: rgba(255, 255, 255, 0.9);
+    width: 200px;
+    height: 150px;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* 3D effect */
+    transition: transform 0.3s;
+}
+
+.box:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+}
+
+button {
+    background-color: #007BFF; /* Button color */
+    color: white; /* Button text color */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 10px; /* Space between input and button */
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
